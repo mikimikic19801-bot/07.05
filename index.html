@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalkulator Kvota</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <div class="container">
+    <h1>Kalkulator Kvota</h1>
+    <div class="inputs">
+      <div>
+        <h3>Stare kvote</h3>
+        <input id="stara1" type="number" step="0.01" placeholder="Stara kvota 1">
+        <input id="stara2" type="number" step="0.01" placeholder="Stara kvota 2">
+        <input id="stara3" type="number" step="0.01" placeholder="Stara kvota 3">
+      </div>
+      <div>
+        <h3>Nove kvote</h3>
+        <input id="nova1" type="number" step="0.01" placeholder="Nova kvota 1">
+        <input id="nova2" type="number" step="0.01" placeholder="Nova kvota 2">
+        <input id="nova3" type="number" step="0.01" placeholder="Nova kvota 3">
+      </div>
+    </div>
+    <button onclick="izracunaj()">Izračunaj</button>
+    <div id="rezultat"></div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
