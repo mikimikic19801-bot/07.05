@@ -70,7 +70,10 @@
                     <p class="text-[10px] sm:text-xs text-gray-400">Pametni kalkulator & AI PWA aplikacija</p>
                 </div>
             </div>
-            <div class="flex items-center space-x-2 sm:space-x-4">
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <button onclick="otvoriPostavke()" class="bg-gray-800 hover:bg-gray-705 text-purple-400 font-bold py-1.5 px-3 rounded-lg text-xs flex items-center gap-1.5 border border-purple-500/20 active:scale-95 transition-all shadow-md" title="Podešavanje Gemini API ključa">
+                    <i class="fa-solid fa-gear"></i> <span class="hidden sm:inline">Podešavanja</span>
+                </button>
                 <button onclick="prikaziUputstvoInstalacije()" class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white font-bold py-1.5 px-3 rounded-lg text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all">
                     <i class="fa-solid fa-mobile-screen-button"></i> <span>Instaliraj App 📱</span>
                 </button>
@@ -121,6 +124,47 @@
             <button onclick="zatvoriUputstvoInstalacije()" class="w-full mt-5 bg-gray-800 hover:bg-gray-750 text-white font-semibold py-2 rounded-xl text-xs transition-all">
                 U redu, razumem
             </button>
+        </div>
+    </div>
+
+    <!-- MODAL ZA PODEŠAVANJE API KLJUČA (ZA VERCEL I TELEFON) -->
+    <div id="settingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70 backdrop-blur-sm">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+            <button onclick="zatvoriPostavke()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="text-center mb-4">
+                <div class="mx-auto w-12 h-12 bg-purple-500/10 text-purple-400 rounded-full flex items-center justify-center text-2xl mb-2">
+                    <i class="fa-solid fa-key"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">Unesi svoj Gemini API Ključ</h3>
+                <p class="text-xs text-gray-400 mt-1">Pošto koristiš aplikaciju na svom Vercel domenu, potreban ti je besplatan ključ kako bi pokrenuo AI analizu.</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="bg-gray-950 p-4 rounded-xl border border-gray-850 space-y-2.5 text-xs text-gray-300">
+                    <p class="leading-relaxed">
+                        Google Gemini API ključ je <strong class="text-green-400">100% besplatan</strong> i dobija se jednim klikom preko Google AI Studio platforme:
+                    </p>
+                    <a href="https://aistudio.google.com/" target="_blank" class="block text-center bg-purple-900/30 hover:bg-purple-900/50 text-purple-300 border border-purple-500/30 rounded-xl py-2 px-3 text-xs font-semibold transition-all">
+                        <i class="fa-solid fa-external-link-alt mr-1"></i> Preuzmi besplatan API ključ ovde
+                    </a>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Gemini API Ključ (AI_KEY)</label>
+                    <input type="password" id="apiKljucInput" placeholder="Nalepi ključ koji počinje sa AIzaSy..." class="w-full bg-gray-950 border border-gray-800 rounded-xl py-2 px-3 text-white text-xs focus:outline-none focus:border-purple-500 transition-all font-mono">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mt-5">
+                <button onclick="zatvoriPostavke()" class="bg-gray-800 hover:bg-gray-750 text-white font-semibold py-2 rounded-xl text-xs transition-all">
+                    Otkaži
+                </button>
+                <button onclick="sacuvajPostavke()" class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-gray-950 font-bold py-2 rounded-xl text-xs transition-all shadow-md">
+                    Sačuvaj Ključ
+                </button>
+            </div>
         </div>
     </div>
 
@@ -490,6 +534,28 @@
 
         let radarChartInstance = null;
 
+        // PWA modalne kontrole i podešavanja API ključa
+        function otvoriPostavke() {
+            const sacuvaniKljuc = localStorage.getItem('gemini_api_key') || "";
+            document.getElementById('apiKljucInput').value = sacuvaniKljuc;
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+
+        function zatvoriPostavke() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+
+        function sacuvajPostavke() {
+            const kljuc = document.getElementById('apiKljucInput').value.trim();
+            localStorage.setItem('gemini_api_key', kljuc);
+            zatvoriPostavke();
+            if (kljuc) {
+                prikaziObavestenje("API ključ je uspešno sačuvan na tvom uređaju!", "green");
+            } else {
+                prikaziObavestenje("API ključ je uklonjen.", "red");
+            }
+        }
+
         // Primer za brzo testiranje (Đoković - Alkaraz)
         const primerMeca = `Novak Djokovic vs Carlos Alcaraz
 Roland Garros – Grend slem
@@ -593,6 +659,16 @@ Carlos Alcaraz: 1.75`;
                 return;
             }
 
+            // Provera API ključa za Vercel
+            let apiKey = localStorage.getItem('gemini_api_key') || "";
+            const isCanvas = window.location.hostname.includes("canvas") || window.location.hostname.includes("localhost") || window.location.hostname === "";
+            
+            if (!apiKey && !isCanvas) {
+                otvoriPostavke();
+                prikaziObavestenje("Molimo te unesi svoj besplatan Gemini API ključ da bi analiza radila na Vercelu!", "red");
+                return;
+            }
+
             document.getElementById('praznoStanje').classList.add('hidden');
             document.getElementById('rezultatiKontejner').classList.add('hidden');
             document.getElementById('loaderAnalize').classList.remove('hidden');
@@ -673,8 +749,7 @@ Igrač 2: ${kvota2Val}
 Molimo te analiziraj meč i obavezno napravi "sablonTekst" koji u potpunosti oponaša stil i format primera koji sam ti poslao.`;
 
             try {
-                // Pozivamo Google Gemini API (koristi se naš bezbedan prolaz za Flash model)
-                const apiKey = ""; 
+                // Pozivamo Google Gemini API
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
                 const payload = {
@@ -714,7 +789,7 @@ Molimo te analiziraj meč i obavezno napravi "sablonTekst" koji u potpunosti opo
 
             } catch (error) {
                 console.error("Greška:", error);
-                prikaziObavestenje("Došlo je do greške prilikom AI analize. Pokušaj ponovo sa drugim tekstom.", "red");
+                prikaziObavestenje("Došlo je do greške prilikom AI analize. Proveri da li je API ključ ispravan u podešavanjima.", "red");
                 document.getElementById('loaderAnalize').classList.add('hidden');
                 document.getElementById('praznoStanje').classList.remove('hidden');
             }
